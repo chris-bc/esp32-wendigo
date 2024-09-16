@@ -1,13 +1,12 @@
 menu "Wendigo Configuration"
 
     config DEFAULT_HOP_MILLIS
-        int "Default dwell time for most features when channel hopping (milliseconds)"
+        int "Default dwell time for WiFi when channel hopping (milliseconds)"
         default 500
         help
-            This specifies the default length of time Gravity should remain on a
+            This specifies the default length of time Wendigo should remain on a
             wireless channel before progressing to the next channel when
-            channel hopping is enabled, for all features except Mana and
-            handshake capture (not yet implemented).
+            channel hopping is enabled.
 
     config BLE_SCAN_SECONDS
         int "Number of seconds for a single cycle of BLE scanning"

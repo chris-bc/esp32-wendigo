@@ -1,22 +1,35 @@
-/* ********************** ESP32 Gravity ***********************
- * Gravity started life as a way to learn how to assemble and *
- * send wireless packets. I started with the 'RickRoll' beacon*
- * attack, and continued the theme.                           *
- * I like to think that Gravity differentiates itself from    *
- * Marauder in that Marauder feels to me like it's about      *
- * gathering information - scanning, capturing handshakes,    *
- * etc. - whereas Gravity is all about sending stuff down the *
- * wire. I'm fascinated by the possibilities of combining Mana*
- * with other attacks, so my initial drive was to develop a   *
- * Mana process from the ground up.                           *
+/* ********************** ESP32 Wendigo ***********************
+ * The spiritual successor to Gravity which, trying to be all *
+ * things to all wireless protocols, inevitably became a      *
+ * juggle between doing things well and doing a lot of        *
+ * things.                                                    *
+ * WiFi will undoubtedly make an appearance in Wendigo        *
+ * because it's fairly straightforward to implement, but the  *
+ * initial focus is Bluetooth Classic and Bluetooth Low       *
+ * Energy reconnaissance - identifying and monitoring devices *
+ * of interest.                                               *
+ * The notion of using passive radio signals to track an      *
+ * individual interests me because it brilliantly highlights  *
+ * the amount of privacy the general public has given up for  *
+ * the convenience of constant connectivity, and I don't      *
+ * believe there is a general awareness of this.              *
+ * Who knows, maybe this will crash & burn, and put my mind   *
+ * at rest. *Hopefully* it will, but I doubt it.              *
  *                                                            *
- * Flipper-Gravity, a companion Flipper Zero app, can be      *
- * downloaded from https://github.com/chris-bc/Flipper-Gravity*
+ * ESP32 Wendigo is a lightweight application that provides   *
+ * wireless data streams to the Flipper Zero application of   *
+ * the same name. This firmware should be used in conjunction *
+ * with the Flipper Zero application Wendigo                  *
+ * https://github.com/chris-bc/wendigo                        *
  *                                                            *
- * ESP32-Gravity: https://github.com/chris-bc/esp32-gravity   *
+ * A Wendigo is a fearsome beast that stalks and eats humans, *
+ * or a spirit that possesses humans and turns them into      *
+ * cannibals, in Native American Algonquian folklore.         *
  *                                                            *
+ *                                                            *
+ * ESP32 Wendigo: https://github.com/chris-bc/esp32-wendigo   *
  * Licensed under the MIT Open Source License.                *
- **************************************************************/
+ *************************************************************/
 
 #include "wendigo.h"
 
