@@ -15,9 +15,7 @@
 #include <esp_interface.h>
 #include <esp_wifi_types.h>
 
-/* Adding mana.h causes it to be unabe to use PROBE_RESPONSE_AUTH_TYPE */
-/* Adding scan.h causes it to be unable to use ScanResultAP and ScanResultSTA */
-#include "gravity.h"
+#include "wendigo.h"
 
 char STRINGS_HOP_STATE_FAIL[];
 char STRINGS_MALLOC_FAIL[];

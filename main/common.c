@@ -1,7 +1,7 @@
 #include "common.h"
 #include "esp_err.h"
 
-const char *TAG = "GRAVITY";
+const char *TAG = "WENDIGO";
 const uint8_t BROADCAST[] = { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff };
 
 /* Common string definitions */
@@ -70,7 +70,7 @@ esp_err_t bytes_to_string(uint8_t *bytes, char *string, int byteCount) {
 /* Retain current MAC */
 static uint8_t current_mac[6] = {0, 0, 0, 0, 0, 0};
 
-uint8_t *gravity_get_mac() {
+uint8_t *wendigo_get_mac() {
     if (current_mac[0] == 0 && current_mac[1] == 0 && current_mac[2] == 0 && current_mac[3] == 0 && current_mac[4] == 0 && current_mac[5] == 0) {
         if (esp_wifi_get_mac(WIFI_IF_AP, current_mac) != ESP_OK) {
             #ifdef CONFIG_FLIPPER
@@ -84,7 +84,7 @@ uint8_t *gravity_get_mac() {
     return current_mac;
 }
 
-esp_err_t gravity_set_mac(uint8_t *newMac) {
+esp_err_t wendigo_set_mac(uint8_t *newMac) {
     if (esp_wifi_set_mac(ESP_IF_WIFI_AP, newMac) != ESP_OK) {
         #ifdef CONFIG_FLIPPER
             printf("Failed to set MAC\n");
@@ -95,9 +95,9 @@ esp_err_t gravity_set_mac(uint8_t *newMac) {
     }
     #ifdef CONFIG_DEBUG
         #ifdef CONFIG_FLIPPER
-            printf("Gravity MAC now: %02x:%02x:%02x:%02x:%02x:%02x\n", newMac[0], newMac[1], newMac[2], newMac[3], newMac[4], newMac[5]);
+            printf("Wendigo MAC now: %02x:%02x:%02x:%02x:%02x:%02x\n", newMac[0], newMac[1], newMac[2], newMac[3], newMac[4], newMac[5]);
         #else
-            ESP_LOGI(TAG, "Successfully updated Gravity MAC to %02x:%02x:%02x:%02x:%02x:%02x\n", newMac[0], newMac[1], newMac[2], newMac[3], newMac[4], newMac[5]);
+            ESP_LOGI(TAG, "Successfully updated Wendigo MAC to %02x:%02x:%02x:%02x:%02x:%02x\n", newMac[0], newMac[1], newMac[2], newMac[3], newMac[4], newMac[5]);
         #endif
     #endif
     memcpy(current_mac, newMac, 6);

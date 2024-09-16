@@ -49,7 +49,7 @@ esp_err_t ieee80211_raw_frame_sanity_check(int32_t arg, int32_t arg2, int32_t ar
 esp_err_t cmd_bluetooth(int argc, char **argv) {
     esp_err_t err = ESP_OK;
     #if defined(CONFIG_BT_ENABLED)
-        //err |= gravity_ble_test();
+        //err |= wendigo_ble_test();
         printf("BT Test harness currently inactive.\n");
     #else
         displayBluetoothUnsupported();
@@ -57,14 +57,14 @@ esp_err_t cmd_bluetooth(int argc, char **argv) {
     return err;
 }
 
-/* Display version info for esp32-Gravity */
+/* Display version info for esp32-Wendigo */
 esp_err_t cmd_version(int argc, char **argv) {
     esp_err_t err = ESP_OK;
 
     #ifdef CONFIG_FLIPPER
-        printf("esp32-Gravity v%s\n", GRAVITY_VERSION);
+        printf("esp32-Wendigo v%s\n", WENDIGO_VERSION);
     #else
-        ESP_LOGI(TAG, "esp32-Gravity v%s\n", GRAVITY_VERSION);
+        ESP_LOGI(TAG, "esp32-Wendigo v%s\n", WENDIGO_VERSION);
     #endif
     return err;
 }
@@ -162,7 +162,7 @@ static void initialize_nvs(void)
     ESP_ERROR_CHECK(err);
 }
 
-static int register_gravity_commands() {
+static int register_wendigo_commands() {
     esp_err_t err;
     for (int i=0; i < CMD_COUNT; ++i) {
         err = esp_console_cmd_register(&commands[i]);
@@ -215,10 +215,10 @@ void app_main(void)
     esp_console_register_help_command();
     register_system();
     register_wifi();
-    register_gravity_commands();
+    register_wendigo_commands();
     /*register_nvs();*/
 
-    ESP_LOGI(TAG, "Started Gravity v%s\n", GRAVITY_VERSION);
+    ESP_LOGI(TAG, "Started Wendigo v%s\n", WENDIGO_VERSION);
 
 #if defined(CONFIG_ESP_CONSOLE_UART_DEFAULT) || defined(CONFIG_ESP_CONSOLE_UART_CUSTOM)
     esp_console_dev_uart_config_t hw_config = ESP_CONSOLE_DEV_UART_CONFIG_DEFAULT();

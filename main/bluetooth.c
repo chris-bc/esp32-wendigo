@@ -8,14 +8,14 @@
 
 #include "uuids.c"
 
-esp_err_t gravity_bt_discover_services(app_gap_cb_t *dev);
+esp_err_t wendigo_bt_discover_services(app_gap_cb_t *dev);
 
-const char *BT_TAG = "bt@GRAVITY";
+const char *BT_TAG = "bt@WENDIGO";
 
-app_gap_cb_t **gravity_bt_devices = NULL;
-uint8_t gravity_bt_dev_count = 0;
-app_gap_cb_t **gravity_svc_disc_q = NULL;
-uint8_t gravity_svc_disc_count = 0;
+app_gap_cb_t **wendigo_bt_devices = NULL;
+uint8_t wendigo_bt_dev_count = 0;
+app_gap_cb_t **wendigo_svc_disc_q = NULL;
+uint8_t wendigo_svc_disc_count = 0;
 app_gap_state_t state;
 static bool btInitialised = false;
 static bool bleInitialised = false;
@@ -527,16 +527,16 @@ static void esp_gap_cb(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param_t *par
 
             /* Does the BDA exist? */
             int devIdx = 0;
-            for ( ; devIdx < gravity_bt_dev_count && memcmp(scan_result->scan_rst.bda, gravity_bt_devices[devIdx]->bda, ESP_BD_ADDR_LEN); ++devIdx) { }
-            if (devIdx < gravity_bt_dev_count) {
+            for ( ; devIdx < wendigo_bt_dev_count && memcmp(scan_result->scan_rst.bda, wendigo_bt_devices[devIdx]->bda, ESP_BD_ADDR_LEN); ++devIdx) { }
+            if (devIdx < wendigo_bt_dev_count) {
                 /* Found - Update */
-                gravity_bt_devices[devIdx]->rssi = scan_result->scan_rst.rssi;
+                wendigo_bt_devices[devIdx]->rssi = scan_result->scan_rst.rssi;
                 if (scan_result->scan_rst.adv_data_len > 0) {
-                    if (gravity_bt_devices[devIdx]->eir != NULL) {
-                        free(gravity_bt_devices[devIdx]->eir);
+                    if (wendigo_bt_devices[devIdx]->eir != NULL) {
+                        free(wendigo_bt_devices[devIdx]->eir);
                     }
-                    gravity_bt_devices[devIdx]->eir = malloc(sizeof(uint8_t) * scan_result->scan_rst.adv_data_len);
-                    if (gravity_bt_devices[devIdx]->eir == NULL) {
+                    wendigo_bt_devices[devIdx]->eir = malloc(sizeof(uint8_t) * scan_result->scan_rst.adv_data_len);
+                    if (wendigo_bt_devices[devIdx]->eir == NULL) {
                         #ifdef CONFIG_FLIPPER
                             printf("%sfor EIR (len %u).\n", STRINGS_MALLOC_FAIL, scan_result->scan_rst.adv_data_len);
                         #else
@@ -544,16 +544,16 @@ static void esp_gap_cb(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param_t *par
                         #endif
                         return; /* Out of memory */
                     }
-                    memcpy(gravity_bt_devices[devIdx]->eir, scan_result->scan_rst.ble_adv, scan_result->scan_rst.adv_data_len);
-                    gravity_bt_devices[devIdx]->eir_len = scan_result->scan_rst.adv_data_len;
+                    memcpy(wendigo_bt_devices[devIdx]->eir, scan_result->scan_rst.ble_adv, scan_result->scan_rst.adv_data_len);
+                    wendigo_bt_devices[devIdx]->eir_len = scan_result->scan_rst.adv_data_len;
                 }
                 if (adv_name_len > 0) {
-                    gravity_bt_devices[devIdx]->bdname_len = adv_name_len;
-                    if (gravity_bt_devices[devIdx]->bdName != NULL) {
-                        free(gravity_bt_devices[devIdx]->bdName);
+                    wendigo_bt_devices[devIdx]->bdname_len = adv_name_len;
+                    if (wendigo_bt_devices[devIdx]->bdName != NULL) {
+                        free(wendigo_bt_devices[devIdx]->bdName);
                     }
-                    gravity_bt_devices[devIdx]->bdName = malloc(sizeof(char) * (adv_name_len + 1));
-                    if (gravity_bt_devices[devIdx]->bdName == NULL) {
+                    wendigo_bt_devices[devIdx]->bdName = malloc(sizeof(char) * (adv_name_len + 1));
+                    if (wendigo_bt_devices[devIdx]->bdName == NULL) {
                         #ifdef CONFIG_FLIPPER
                             printf("%sfor bdName (len %u).\n", STRINGS_MALLOC_FAIL, adv_name_len);
                         #else
@@ -561,11 +561,11 @@ static void esp_gap_cb(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param_t *par
                         #endif
                         return; /* ESP_ERR_NO_MEM */
                     }
-                    strncpy(gravity_bt_devices[devIdx]->bdName, bdNameStr, adv_name_len);
-                    gravity_bt_devices[devIdx]->bdName[adv_name_len] = '\0';
+                    strncpy(wendigo_bt_devices[devIdx]->bdName, bdNameStr, adv_name_len);
+                    wendigo_bt_devices[devIdx]->bdName[adv_name_len] = '\0';
                 }
             } else {
-                bt_dev_add_components(scan_result->scan_rst.bda, bdNameStr, adv_name_len, scan_result->scan_rst.ble_adv, scan_result->scan_rst.adv_data_len, 0, scan_result->scan_rst.rssi, GRAVITY_BT_SCAN_BLE);
+                bt_dev_add_components(scan_result->scan_rst.bda, bdNameStr, adv_name_len, scan_result->scan_rst.ble_adv, scan_result->scan_rst.adv_data_len, 0, scan_result->scan_rst.rssi, WENDIGO_BT_SCAN_BLE);
             }
             break;
         case ESP_GAP_SEARCH_INQ_CMPL_EVT:
@@ -642,11 +642,11 @@ static void esp_gattc_cb(esp_gattc_cb_event_t event, esp_gatt_if_t gattc_if, esp
     } while (0);
 }
 
-esp_err_t gravity_ble_scan_start() {
+esp_err_t wendigo_ble_scan_start() {
     esp_err_t err = ESP_OK;
 
     if (!btInitialised) {
-        err = gravity_bt_initialise();
+        err = wendigo_bt_initialise();
         if (err != ESP_OK) {
             printf("%s\n", esp_err_to_name(err));
             return err;
@@ -687,7 +687,7 @@ esp_err_t gravity_ble_scan_start() {
 
 /* update_device_info
    This function is called by the Bluetooth callback when a device discovered event
-   is received. It will maintain gravity_bt_devices and gravity_bt_dev_count with a
+   is received. It will maintain wendigo_bt_devices and wendigo_bt_dev_count with a
    singe element per physical device.
 */
 void update_device_info(esp_bt_gap_cb_param_t *param) {
@@ -715,12 +715,12 @@ void update_device_info(esp_bt_gap_cb_param_t *param) {
     int deviceIdx = 0;
     memcpy(dev_bda, param->disc_res.bda, ESP_BD_ADDR_LEN);
     bda2str(param->disc_res.bda, bda_str, MAC_STRLEN + 1);
-    for (; deviceIdx < gravity_bt_dev_count && memcmp(param->disc_res.bda,
-                    gravity_bt_devices[deviceIdx]->bda, ESP_BD_ADDR_LEN); ++deviceIdx) { }
+    for (; deviceIdx < wendigo_bt_dev_count && memcmp(param->disc_res.bda,
+                    wendigo_bt_devices[deviceIdx]->bda, ESP_BD_ADDR_LEN); ++deviceIdx) { }
 
     int numProp = param->disc_res.num_prop;
     #ifdef CONFIG_DEBUG_VERBOSE
-        printf("BEGIN UPDATE_DEVICE_INFO() BDA: %s %sNum properties %d: ", bda_str, (deviceIdx < gravity_bt_dev_count)?"Already cached, ":"New device, ", numProp);
+        printf("BEGIN UPDATE_DEVICE_INFO() BDA: %s %sNum properties %d: ", bda_str, (deviceIdx < wendigo_bt_dev_count)?"Already cached, ":"New device, ", numProp);
         /* Display info about each attached property */
         for (int i = 0; i < numProp; ++i) {
             p = param->disc_res.prop + i;
@@ -788,12 +788,12 @@ void update_device_info(esp_bt_gap_cb_param_t *param) {
         }
     }
 
-    /* Is BDA already in gravity_bt_devices[]? */
-    if (deviceIdx < gravity_bt_dev_count) {
+    /* Is BDA already in wendigo_bt_devices[]? */
+    if (deviceIdx < wendigo_bt_dev_count) {
         /* Found an existing device with the same BDA - Update its RSSI */
         /* YAGNI - Update bdname if it's changed */
         // TODO: Include a timestamp so we can age devices
-        if (paramUpdated[BT_PARAM_BDNAME] && ((gravity_bt_devices[deviceIdx]->bdName == NULL && dev_bdname_len > 0) || strcmp(gravity_bt_devices[deviceIdx]->bdName, dev_bdname))) {
+        if (paramUpdated[BT_PARAM_BDNAME] && ((wendigo_bt_devices[deviceIdx]->bdName == NULL && dev_bdname_len > 0) || strcmp(wendigo_bt_devices[deviceIdx]->bdName, dev_bdname))) {
             #ifdef CONFIG_FLIPPER
                 printf("BT: Update BT Device %s Name \"%s\"\n", bda_str, dev_bdname);
             #else
@@ -808,7 +808,7 @@ void update_device_info(esp_bt_gap_cb_param_t *param) {
             #endif
         }
     } else {
-        /* It's a new device - Add to gravity_bt_devices[] */
+        /* It's a new device - Add to wendigo_bt_devices[] */
         char devString[41 + ESP_BT_GAP_MAX_BDNAME_LEN];
         sprintf(devString, "Found BT Device %s", bda_str);
         /* Append name if we have one */
@@ -823,7 +823,7 @@ void update_device_info(esp_bt_gap_cb_param_t *param) {
         #else
             ESP_LOGI(BT_TAG, "%s", devString);
         #endif
-        bt_dev_add_components(dev_bda, dev_bdname, dev_bdname_len, dev_eir, dev_eir_len, dev_cod, dev_rssi, GRAVITY_BT_SCAN_CLASSIC_DISCOVERY);
+        bt_dev_add_components(dev_bda, dev_bdname, dev_bdname_len, dev_eir, dev_eir_len, dev_cod, dev_rssi, WENDIGO_BT_SCAN_CLASSIC_DISCOVERY);
     }
 
     state = APP_GAP_STATE_DEVICE_DISCOVER_COMPLETE;
@@ -831,31 +831,31 @@ void update_device_info(esp_bt_gap_cb_param_t *param) {
     //esp_bt_gap_cancel_discovery();
 }
 
-/* Update the element of gravity_bt_devices[] that is specified by theBda
+/* Update the element of wendigo_bt_devices[] that is specified by theBda
    If the BDA does not exist in the data model it will be created instead.
 */
 esp_err_t updateDevice(bool *updatedFlags, esp_bd_addr_t theBda, int32_t theCod, int32_t theRssi, uint8_t theNameLen, char *theName, uint8_t theEirLen, uint8_t *theEir) {
     esp_err_t err = ESP_OK;
     int deviceIdx = 0;
-    while (deviceIdx < gravity_bt_dev_count && memcmp(theBda, gravity_bt_devices[deviceIdx]->bda, ESP_BD_ADDR_LEN)) {
+    while (deviceIdx < wendigo_bt_dev_count && memcmp(theBda, wendigo_bt_devices[deviceIdx]->bda, ESP_BD_ADDR_LEN)) {
         ++deviceIdx;
     }
-    if (deviceIdx < gravity_bt_dev_count) {
+    if (deviceIdx < wendigo_bt_dev_count) {
         /* We found a stored device with the same BDA */
         if (updatedFlags[BT_PARAM_COD]) {
-            gravity_bt_devices[deviceIdx]->cod = theCod;
+            wendigo_bt_devices[deviceIdx]->cod = theCod;
             updatedFlags[BT_PARAM_COD] = false;
         }
         if (updatedFlags[BT_PARAM_RSSI]) {
-            gravity_bt_devices[deviceIdx]->rssi = theRssi;
+            wendigo_bt_devices[deviceIdx]->rssi = theRssi;
             updatedFlags[BT_PARAM_RSSI] = false;
         }
         if (updatedFlags[BT_PARAM_BDNAME]) {
-            if (gravity_bt_devices[deviceIdx]->bdName != NULL) {
-                free(gravity_bt_devices[deviceIdx]->bdName);
+            if (wendigo_bt_devices[deviceIdx]->bdName != NULL) {
+                free(wendigo_bt_devices[deviceIdx]->bdName);
             }
-            gravity_bt_devices[deviceIdx]->bdName = malloc(sizeof(char) * (theNameLen + 1));
-            if (gravity_bt_devices[deviceIdx]->bdName == NULL) {
+            wendigo_bt_devices[deviceIdx]->bdName = malloc(sizeof(char) * (theNameLen + 1));
+            if (wendigo_bt_devices[deviceIdx]->bdName == NULL) {
                 #ifdef CONFIG_FLIPPER
                     printf("%sfor BDName (len %u).\n", STRINGS_MALLOC_FAIL, theNameLen);
                 #else
@@ -863,17 +863,17 @@ esp_err_t updateDevice(bool *updatedFlags, esp_bd_addr_t theBda, int32_t theCod,
                 #endif
                 return ESP_ERR_NO_MEM;
             }
-            strncpy(gravity_bt_devices[deviceIdx]->bdName, theName, theNameLen);
-            gravity_bt_devices[deviceIdx]->bdName[theNameLen] = '\0';
-            gravity_bt_devices[deviceIdx]->bdname_len = theNameLen;
+            strncpy(wendigo_bt_devices[deviceIdx]->bdName, theName, theNameLen);
+            wendigo_bt_devices[deviceIdx]->bdName[theNameLen] = '\0';
+            wendigo_bt_devices[deviceIdx]->bdname_len = theNameLen;
             updatedFlags[BT_PARAM_BDNAME] = false;
         }
         if (updatedFlags[BT_PARAM_EIR]) {
-            if (gravity_bt_devices[deviceIdx]->eir != NULL) {
-                free(gravity_bt_devices[deviceIdx]->eir);
+            if (wendigo_bt_devices[deviceIdx]->eir != NULL) {
+                free(wendigo_bt_devices[deviceIdx]->eir);
             }
-            gravity_bt_devices[deviceIdx]->eir = malloc(sizeof(uint8_t) * theEirLen);
-            if (gravity_bt_devices[deviceIdx] == NULL) {
+            wendigo_bt_devices[deviceIdx]->eir = malloc(sizeof(uint8_t) * theEirLen);
+            if (wendigo_bt_devices[deviceIdx] == NULL) {
                 #ifdef CONFIG_FLIPPER
                     printf("%sfor EIR (len %u).\n", STRINGS_MALLOC_FAIL, theEirLen);
                 #else
@@ -881,33 +881,33 @@ esp_err_t updateDevice(bool *updatedFlags, esp_bd_addr_t theBda, int32_t theCod,
                 #endif
                 return ESP_ERR_NO_MEM;
             }
-            memcpy(gravity_bt_devices[deviceIdx]->eir, theEir, theEirLen);
-            gravity_bt_devices[deviceIdx]->eir_len = theEirLen;
+            memcpy(wendigo_bt_devices[deviceIdx]->eir, theEir, theEirLen);
+            wendigo_bt_devices[deviceIdx]->eir_len = theEirLen;
         }
         /* Update lastSeen and lastSeen */
-        gravity_bt_devices[deviceIdx]->lastSeen = clock();
+        wendigo_bt_devices[deviceIdx]->lastSeen = clock();
     } else {
         /* Device doesn't exist, add it instead */
-        return bt_dev_add_components(theBda, theName, theNameLen, theEir, theEirLen, theCod, theRssi, GRAVITY_BT_SCAN_CLASSIC_DISCOVERY);
+        return bt_dev_add_components(theBda, theName, theNameLen, theEir, theEirLen, theCod, theRssi, WENDIGO_BT_SCAN_CLASSIC_DISCOVERY);
     }
     return err;
 }
 
-app_gap_cb_t *gravity_svc_disc_queue_pop() {
+app_gap_cb_t *wendigo_svc_disc_queue_pop() {
     #ifdef CONFIG_DEBUG_VERBOSE
         char bda_str[MAC_STRLEN + 1] = "";
-        bda2str(gravity_svc_disc_q[0]->bda, bda_str, MAC_STRLEN + 1);
-        printf("Beginning of pop, first queue item is %s (%s).\n", bda_str, gravity_svc_disc_q[0]->bdName);
+        bda2str(wendigo_svc_disc_q[0]->bda, bda_str, MAC_STRLEN + 1);
+        printf("Beginning of pop, first queue item is %s (%s).\n", bda_str, wendigo_svc_disc_q[0]->bdName);
     #endif
 
     app_gap_cb_t **newQ = NULL;
-    if (gravity_svc_disc_count == 0) {
+    if (wendigo_svc_disc_count == 0) {
         printf("queue is empty, returning NULL\n");
         return NULL;
     } else {
         /* Shrink the queue */
-        if (gravity_svc_disc_count > 1) {
-            newQ = malloc(sizeof(app_gap_cb_t *) * (gravity_svc_disc_count - 1));
+        if (wendigo_svc_disc_count > 1) {
+            newQ = malloc(sizeof(app_gap_cb_t *) * (wendigo_svc_disc_count - 1));
             if (newQ == NULL) {
                 #ifdef CONFIG_FLIPPER
                     printf("%s\n", STRINGS_MALLOC_FAIL);
@@ -917,12 +917,12 @@ app_gap_cb_t *gravity_svc_disc_queue_pop() {
                 return NULL;
             }
             /* Copy relevant array elements beginning with the first */
-            memcpy(newQ, &(gravity_svc_disc_q[1]), (gravity_svc_disc_count - 1));
+            memcpy(newQ, &(wendigo_svc_disc_q[1]), (wendigo_svc_disc_count - 1));
         }
-        app_gap_cb_t *retVal = gravity_svc_disc_q[0];
-        --gravity_svc_disc_count;
-        free(gravity_svc_disc_q);
-        gravity_svc_disc_q = newQ;
+        app_gap_cb_t *retVal = wendigo_svc_disc_q[0];
+        --wendigo_svc_disc_count;
+        free(wendigo_svc_disc_q);
+        wendigo_svc_disc_q = newQ;
         return retVal;
     }
 }
@@ -998,8 +998,8 @@ esp_err_t listUnknownServicesDev(app_gap_cb_t *device) {
 esp_err_t listUnknownServices() {
     esp_err_t err = ESP_OK;
 
-    for (int i = 0; i < gravity_bt_dev_count; ++i) {
-        err |= listUnknownServicesDev(gravity_bt_devices[i]);
+    for (int i = 0; i < wendigo_bt_dev_count; ++i) {
+        err |= listUnknownServicesDev(wendigo_bt_devices[i]);
         printf("\n");
     }
     return err;
@@ -1015,7 +1015,7 @@ esp_err_t listKnownServices(app_gap_cb_t **devices, uint8_t devCount) {
 }
 
 esp_err_t bt_listAllServices() {
-    return bt_listAllServicesFor(gravity_bt_devices, gravity_bt_dev_count);
+    return bt_listAllServicesFor(wendigo_bt_devices, wendigo_bt_dev_count);
 }
 
 esp_err_t bt_listAllServicesFor(app_gap_cb_t **devices, uint8_t devCount) {
@@ -1185,9 +1185,9 @@ esp_err_t identifyKnownServices(app_gap_cb_t *thisDev) {
 
 app_gap_cb_t *deviceWithBDA(esp_bd_addr_t bda) {
     uint8_t devIdx = 0;
-    for ( ; devIdx < gravity_bt_dev_count && memcmp(bda, gravity_bt_devices[devIdx]->bda, 6); ++devIdx) { }
-    if (devIdx < gravity_bt_dev_count) {
-        return gravity_bt_devices[devIdx];
+    for ( ; devIdx < wendigo_bt_dev_count && memcmp(bda, wendigo_bt_devices[devIdx]->bda, 6); ++devIdx) { }
+    if (devIdx < wendigo_bt_dev_count) {
+        return wendigo_bt_devices[devIdx];
     } else {
         return NULL;
     }
@@ -1265,10 +1265,10 @@ static void bt_remote_service_cb(esp_bt_gap_cb_param_t *param) {
     }
     #ifdef CONFIG_DEBUG_VERBOSE
         printf("remote service callback - Outputs done, checking queue (len %u, addr %p)\n",
-                gravity_svc_disc_count, gravity_svc_disc_q);
+                wendigo_svc_disc_count, wendigo_svc_disc_q);
     #endif
     /* Service discovery complete - Is there a queue to take the next one from? */
-    if (gravity_svc_disc_count == 0) {
+    if (wendigo_svc_disc_count == 0) {
         /* No queue - Finish service discovery */
         #ifdef CONFIG_DEBUG
             #ifdef CONFIG_FLIPPER
@@ -1279,7 +1279,7 @@ static void bt_remote_service_cb(esp_bt_gap_cb_param_t *param) {
         #endif
         btServiceDiscoveryActive = false;
     } else {
-        app_gap_cb_t *thisDev = gravity_svc_disc_queue_pop();
+        app_gap_cb_t *thisDev = wendigo_svc_disc_queue_pop();
         #ifdef CONFIG_DEBUG_VERBOSE
             char bda_str[MAC_STRLEN + 1] = "";
             if (thisDev != NULL) {
@@ -1310,7 +1310,7 @@ static void bt_gap_cb(esp_bt_gap_cb_event_t event, esp_bt_gap_cb_param_t *param)
                     esp_bt_gap_start_discovery(ESP_BT_INQ_MODE_GENERAL_INQUIRY, CONFIG_BT_SCAN_DURATION, 0);
                 }
             } else if (param->disc_st_chg.state == ESP_BT_GAP_DISCOVERY_STARTED) {
-                gravity_bt_scan_display_status();
+                wendigo_bt_scan_display_status();
             }
             break;
         case ESP_BT_GAP_RMT_SRVCS_EVT:
@@ -1324,15 +1324,15 @@ static void bt_gap_cb(esp_bt_gap_cb_event_t event, esp_bt_gap_cb_param_t *param)
     return;
 }
 
-esp_err_t gravity_bt_gap_start() {
+esp_err_t wendigo_bt_gap_start() {
     esp_err_t err = ESP_OK;
 
     if (!btInitialised) {
-        err |= gravity_bt_initialise();
+        err |= wendigo_bt_initialise();
     }
     err |= esp_bt_gap_register_callback(bt_gap_cb);
     /* Set Device name */
-    char *dev_name = "GRAVITY_INQUIRY";
+    char *dev_name = "WENDIGO_INQUIRY";
     err |= esp_bt_dev_set_device_name(dev_name);
 
     /* Set discoverable and connectable, wait to be connected */
@@ -1345,7 +1345,7 @@ esp_err_t gravity_bt_gap_start() {
     return err;
 }
 
-esp_err_t gravity_bt_initialise() {    esp_err_t err = ESP_OK;
+esp_err_t wendigo_bt_initialise() {    esp_err_t err = ESP_OK;
     esp_bt_controller_config_t bt_cfg = BT_CONTROLLER_INIT_CONFIG_DEFAULT();
     #if defined(CONFIG_BT_CLASSIC_ENABLED)
         bt_cfg.mode = ESP_BT_MODE_BTDM;
@@ -1362,9 +1362,9 @@ esp_err_t gravity_bt_initialise() {    esp_err_t err = ESP_OK;
     return err;
 }
 
-/* Add a new Bluetooth device to gravity_bt_devices[]
+/* Add a new Bluetooth device to wendigo_bt_devices[]
    Creates a new BT device struct using the specified parameters and adds it to
-   gravity_bt_devices[].
+   wendigo_bt_devices[].
    A uniqueness check will be done using BDA prior to adding the specified device.
    The most barebones, valid way to call this (i.e. the minimum info that must be
    specified for a BT device) is bt_dev_add(myValidBDA, NULL, 0, NULL, 0, myValidCOD, 0, 0);
@@ -1372,33 +1372,33 @@ esp_err_t gravity_bt_initialise() {    esp_err_t err = ESP_OK;
    excluding the trailing '\0'.
 */
 esp_err_t bt_dev_add_components(esp_bd_addr_t bda, char *bdName, uint8_t bdNameLen, uint8_t *eir,
-                        uint8_t eirLen, uint32_t cod, int32_t rssi, gravity_bt_scan_t devScanType) {
+                        uint8_t eirLen, uint32_t cod, int32_t rssi, wendigo_bt_scan_t devScanType) {
     esp_err_t err = ESP_OK;
     esp_err_t err2 = ESP_OK;
     UNUSED(err2);
 
     /* Make sure the specified BDA doesn't already exist */
-    if (isBDAInArray(bda, gravity_bt_devices, gravity_bt_dev_count)) {
+    if (isBDAInArray(bda, wendigo_bt_devices, wendigo_bt_dev_count)) {
         char bdaStr[MAC_STRLEN + 1] = "";
         #ifdef CONFIG_FLIPPER
             printf("Unable to add existing BT Dev:\n%25s\n", bda2str(bda, bdaStr, MAC_STRLEN + 1));
         #else
-            ESP_LOGE(BT_TAG, "Unable to add the requested Bluetooth device to Gravity's device array; BDA %s already exists.", bda2str(bda, bdaStr, MAC_STRLEN + 1));
+            ESP_LOGE(BT_TAG, "Unable to add the requested Bluetooth device to Wendigo's device array; BDA %s already exists.", bda2str(bda, bdaStr, MAC_STRLEN + 1));
         #endif
         return ESP_ERR_NOT_SUPPORTED;
     }
 
-    /* Set up a replacement copy of gravity_bt_devices */
-    app_gap_cb_t **newDevices = gravity_ble_purge_and_malloc(sizeof(app_gap_cb_t *) * (gravity_bt_dev_count + 1));
+    /* Set up a replacement copy of wendigo_bt_devices */
+    app_gap_cb_t **newDevices = wendigo_ble_purge_and_malloc(sizeof(app_gap_cb_t *) * (wendigo_bt_dev_count + 1));
     if (newDevices == NULL) {
         #ifdef CONFIG_FLIPPER
             printf("%sto add BT device\n", STRINGS_MALLOC_FAIL);
         #else
-            ESP_LOGE(BT_TAG, "%sfor Bluetooth Device #%d.", STRINGS_MALLOC_FAIL, (gravity_bt_dev_count + 1));
+            ESP_LOGE(BT_TAG, "%sfor Bluetooth Device #%d.", STRINGS_MALLOC_FAIL, (wendigo_bt_dev_count + 1));
         #endif
         return ESP_ERR_NO_MEM;
     }
-    /* Copy contents from gravity_bt_devices to newDevices */
+    /* Copy contents from wendigo_bt_devices to newDevices */
     /* This was previously a loop iterating through and calling an additional function to
        copy the struct. Luckily I stuffed up and corrupted nearby memory so I had to use my
        brain and come up with a simple solution - Copy the memory contents of the first array
@@ -1406,40 +1406,40 @@ esp_err_t bt_dev_add_components(esp_bd_addr_t bda, char *bdName, uint8_t bdNameL
     */
     /* Calculate max index while we're looping */
     uint8_t maxIndex = 0;
-    for (int i=0;i<gravity_bt_dev_count;++i) {
-        newDevices[i] = gravity_bt_devices[i];
-        if (gravity_bt_devices[i]->index > maxIndex) {
-            maxIndex = gravity_bt_devices[i]->index;
+    for (int i=0;i<wendigo_bt_dev_count;++i) {
+        newDevices[i] = wendigo_bt_devices[i];
+        if (wendigo_bt_devices[i]->index > maxIndex) {
+            maxIndex = wendigo_bt_devices[i]->index;
         }
     }
-    /* Create new device at index gravity_bt_dev_count */
-    newDevices[gravity_bt_dev_count] = gravity_ble_purge_and_malloc(sizeof(app_gap_cb_t));
-    if (newDevices[gravity_bt_dev_count] == NULL) {
+    /* Create new device at index wendigo_bt_dev_count */
+    newDevices[wendigo_bt_dev_count] = wendigo_ble_purge_and_malloc(sizeof(app_gap_cb_t));
+    if (newDevices[wendigo_bt_dev_count] == NULL) {
         #ifdef CONFIG_FLIPPER
-            printf("%sfor BT device %d.\n", STRINGS_MALLOC_FAIL, gravity_bt_dev_count + 1);
+            printf("%sfor BT device %d.\n", STRINGS_MALLOC_FAIL, wendigo_bt_dev_count + 1);
         #else
-            ESP_LOGE(BT_TAG, "%s(%d) for BT device #%d.", STRINGS_MALLOC_FAIL, sizeof(app_gap_cb_t), gravity_bt_dev_count + 1);
+            ESP_LOGE(BT_TAG, "%s(%d) for BT device #%d.", STRINGS_MALLOC_FAIL, sizeof(app_gap_cb_t), wendigo_bt_dev_count + 1);
         #endif
         free(newDevices);
         return ESP_ERR_NO_MEM;
     }
-    newDevices[gravity_bt_dev_count]->bt_services.known_services = NULL;
-    newDevices[gravity_bt_dev_count]->bt_services.known_services_len = 0;
-    newDevices[gravity_bt_dev_count]->bt_services.num_services = 0;
-    newDevices[gravity_bt_dev_count]->bt_services.service_uuids = NULL;
-    newDevices[gravity_bt_dev_count]->bt_services.lastSeen = 0;
-    newDevices[gravity_bt_dev_count]->bdname_len = bdNameLen;
-    newDevices[gravity_bt_dev_count]->eir_len = eirLen;
-    newDevices[gravity_bt_dev_count]->eir = NULL;
-    newDevices[gravity_bt_dev_count]->rssi = rssi;
-    newDevices[gravity_bt_dev_count]->cod = cod;
-    newDevices[gravity_bt_dev_count]->scanType = devScanType;
-    newDevices[gravity_bt_dev_count]->lastSeen = clock();
-    newDevices[gravity_bt_dev_count]->selected = false;
-    newDevices[gravity_bt_dev_count]->index = maxIndex + 1;
-    memcpy(newDevices[gravity_bt_dev_count]->bda, bda, ESP_BD_ADDR_LEN);
-    newDevices[gravity_bt_dev_count]->bdName = gravity_ble_purge_and_malloc(sizeof(char) * (bdNameLen + 1));
-    if (newDevices[gravity_bt_dev_count]->bdName == NULL) {
+    newDevices[wendigo_bt_dev_count]->bt_services.known_services = NULL;
+    newDevices[wendigo_bt_dev_count]->bt_services.known_services_len = 0;
+    newDevices[wendigo_bt_dev_count]->bt_services.num_services = 0;
+    newDevices[wendigo_bt_dev_count]->bt_services.service_uuids = NULL;
+    newDevices[wendigo_bt_dev_count]->bt_services.lastSeen = 0;
+    newDevices[wendigo_bt_dev_count]->bdname_len = bdNameLen;
+    newDevices[wendigo_bt_dev_count]->eir_len = eirLen;
+    newDevices[wendigo_bt_dev_count]->eir = NULL;
+    newDevices[wendigo_bt_dev_count]->rssi = rssi;
+    newDevices[wendigo_bt_dev_count]->cod = cod;
+    newDevices[wendigo_bt_dev_count]->scanType = devScanType;
+    newDevices[wendigo_bt_dev_count]->lastSeen = clock();
+    newDevices[wendigo_bt_dev_count]->selected = false;
+    newDevices[wendigo_bt_dev_count]->index = maxIndex + 1;
+    memcpy(newDevices[wendigo_bt_dev_count]->bda, bda, ESP_BD_ADDR_LEN);
+    newDevices[wendigo_bt_dev_count]->bdName = wendigo_ble_purge_and_malloc(sizeof(char) * (bdNameLen + 1));
+    if (newDevices[wendigo_bt_dev_count]->bdName == NULL) {
         #ifdef CONFIG_FLIPPER
             printf("%sfor BDName (len %u).\n", STRINGS_MALLOC_FAIL, bdNameLen);
         #else
@@ -1448,40 +1448,40 @@ esp_err_t bt_dev_add_components(esp_bd_addr_t bda, char *bdName, uint8_t bdNameL
         free(newDevices);
         return ESP_ERR_NO_MEM;
     }
-    strncpy(newDevices[gravity_bt_dev_count]->bdName, bdName, bdNameLen);
-    newDevices[gravity_bt_dev_count]->bdName[bdNameLen] = '\0';
+    strncpy(newDevices[wendigo_bt_dev_count]->bdName, bdName, bdNameLen);
+    newDevices[wendigo_bt_dev_count]->bdName[bdNameLen] = '\0';
     if (eirLen > 0) {
-        newDevices[gravity_bt_dev_count]->eir = gravity_ble_purge_and_malloc(sizeof(uint8_t) * eirLen);
-        if (newDevices[gravity_bt_dev_count]->eir == NULL) {
+        newDevices[wendigo_bt_dev_count]->eir = wendigo_ble_purge_and_malloc(sizeof(uint8_t) * eirLen);
+        if (newDevices[wendigo_bt_dev_count]->eir == NULL) {
             #ifdef CONFIG_FLIPPER
                 printf("%sfor EIR (len %u).\n", STRINGS_MALLOC_FAIL, eirLen);
             #else
                 ESP_LOGE(BT_TAG, "%sfor EIR (length %u).", STRINGS_MALLOC_FAIL, eirLen);
             #endif
-            if (newDevices[gravity_bt_dev_count]->bdName != NULL) {
-                free(newDevices[gravity_bt_dev_count]->bdName);
+            if (newDevices[wendigo_bt_dev_count]->bdName != NULL) {
+                free(newDevices[wendigo_bt_dev_count]->bdName);
             }
             free(newDevices);
             return ESP_ERR_NO_MEM;
         }
-        memcpy(newDevices[gravity_bt_dev_count]->eir, eir, eirLen);
+        memcpy(newDevices[wendigo_bt_dev_count]->eir, eir, eirLen);
     }
 
     /* Finally copy new device array into place */
-    if (gravity_bt_devices != NULL) {
-        free(gravity_bt_devices);
+    if (wendigo_bt_devices != NULL) {
+        free(wendigo_bt_devices);
     }
-    gravity_bt_devices = newDevices;
-    ++gravity_bt_dev_count;
+    wendigo_bt_devices = newDevices;
+    ++wendigo_bt_dev_count;
 
 
     #ifdef CONFIG_DEBUG_VERBOSE
-        printf("End of bt_dev_add_components(), gravity_bt_devices has %u elements:\n", gravity_bt_dev_count);
-        for (int i =0; i < gravity_bt_dev_count; ++i) {
+        printf("End of bt_dev_add_components(), wendigo_bt_devices has %u elements:\n", wendigo_bt_dev_count);
+        for (int i =0; i < wendigo_bt_dev_count; ++i) {
             if (i > 0) {
                 printf(",\t");
             }
-            printf("\"%s\"", gravity_bt_devices[i]->bdName);
+            printf("\"%s\"", wendigo_bt_devices[i]->bdName);
         }
     #endif
 
@@ -1564,10 +1564,10 @@ esp_err_t bt_dev_copy(app_gap_cb_t dest, app_gap_cb_t source) {
    The queue is consumed by bt_gap_cb, with a new instance started when the
    previous one completes.
 */
-esp_err_t gravity_bt_discover_services(app_gap_cb_t *dev) {
+esp_err_t wendigo_bt_discover_services(app_gap_cb_t *dev) {
     if (btServiceDiscoveryActive) {
         /* Create new queue object */
-        app_gap_cb_t **newQ = malloc(sizeof(app_gap_cb_t *) * (gravity_svc_disc_count + 1));
+        app_gap_cb_t **newQ = malloc(sizeof(app_gap_cb_t *) * (wendigo_svc_disc_count + 1));
         if (newQ == NULL) {
             #ifdef CONFIG_FLIPPER
                 printf("%s\n", STRINGS_MALLOC_FAIL);
@@ -1576,29 +1576,29 @@ esp_err_t gravity_bt_discover_services(app_gap_cb_t *dev) {
             #endif
             return ESP_ERR_NO_MEM;
         }
-        /* Copy across gravity_svc_disc_count elements */
-        memcpy(newQ, gravity_svc_disc_q, sizeof(app_gap_cb_t *) * gravity_svc_disc_count);
+        /* Copy across wendigo_svc_disc_count elements */
+        memcpy(newQ, wendigo_svc_disc_q, sizeof(app_gap_cb_t *) * wendigo_svc_disc_count);
         /* Append dev */
-        newQ[gravity_svc_disc_count] = dev;
+        newQ[wendigo_svc_disc_count] = dev;
         /* Replace queue */
-        if (gravity_svc_disc_count > 0) {
-            free(gravity_svc_disc_q);
+        if (wendigo_svc_disc_count > 0) {
+            free(wendigo_svc_disc_q);
         }
-        gravity_svc_disc_q = newQ;
-        ++gravity_svc_disc_count;
+        wendigo_svc_disc_q = newQ;
+        ++wendigo_svc_disc_count;
 
         #ifdef CONFIG_DEBUG_VERBOSE
             char bda_str[MAC_STRLEN + 1] = "";
-            bda2str(gravity_svc_disc_q[gravity_svc_disc_count - 1]->bda, bda_str, MAC_STRLEN + 1);
+            bda2str(wendigo_svc_disc_q[wendigo_svc_disc_count - 1]->bda, bda_str, MAC_STRLEN + 1);
             printf("Service discovery: %s, queueing BDA %s (%s) at index %u\n",
-                    btServiceDiscoveryActive?"Starting":"Stopped", bda_str, gravity_svc_disc_q[gravity_svc_disc_count - 1]->bdName, gravity_svc_disc_count);
+                    btServiceDiscoveryActive?"Starting":"Stopped", bda_str, wendigo_svc_disc_q[wendigo_svc_disc_count - 1]->bdName, wendigo_svc_disc_count);
         #endif
     } else {
         #ifdef CONFIG_DEBUG_VERBOSE
             char bda_str[MAC_STRLEN + 1] = "";
             bda2str(dev->bda, bda_str, MAC_STRLEN + 1);
             printf("Starting service discovery for %s (%s).\nQueue length %u, address %p.\n",
-                    bda_str, dev->bdName, gravity_svc_disc_count, gravity_svc_disc_q);
+                    bda_str, dev->bdName, wendigo_svc_disc_count, wendigo_svc_disc_q);
         #endif
         /* Simply start service discovery */
         btServiceDiscoveryActive = true;
@@ -1607,8 +1607,8 @@ esp_err_t gravity_bt_discover_services(app_gap_cb_t *dev) {
     return ESP_OK;
 }
 
-/* Discover all services for gravity_bt_devices */
-esp_err_t gravity_bt_discover_services_for(app_gap_cb_t **devices, uint8_t deviceCount) {
+/* Discover all services for wendigo_bt_devices */
+esp_err_t wendigo_bt_discover_services_for(app_gap_cb_t **devices, uint8_t deviceCount) {
     esp_err_t res = ESP_OK;
 
     #ifdef CONFIG_DEBUG_VERBOSE
@@ -1626,14 +1626,14 @@ esp_err_t gravity_bt_discover_services_for(app_gap_cb_t **devices, uint8_t devic
     for (int i = 0; i < deviceCount; ++i) {
         char bda_str[MAC_STRLEN + 1];
         printf("Requesting services for %s\n", devices[i]->bdname_len > 0?devices[i]->bdName:bda2str(devices[i]->bda, bda_str, MAC_STRLEN + 1));
-        res |= gravity_bt_discover_services(devices[i]);
+        res |= wendigo_bt_discover_services(devices[i]);
     }
     return res;
 }
 
-/* Discover all services for gravity_bt_devices */
-esp_err_t gravity_bt_discover_all_services() {
-    return gravity_bt_discover_services_for(gravity_bt_devices, gravity_bt_dev_count);
+/* Discover all services for wendigo_bt_devices */
+esp_err_t wendigo_bt_discover_all_services() {
+    return wendigo_bt_discover_services_for(wendigo_bt_devices, wendigo_bt_dev_count);
 }
 
 /* Discover Classic Bluetooth services offered by the specified device
@@ -1641,55 +1641,55 @@ esp_err_t gravity_bt_discover_all_services() {
    the only relevant attribute is BDA. Note that this is a pointer.
    To discover services for all devices provide NULL for device.
 */
-esp_err_t gravity_bt_gap_services_discover(app_gap_cb_t *device) {
+esp_err_t wendigo_bt_gap_services_discover(app_gap_cb_t *device) {
     esp_err_t err = ESP_OK;
     UNUSED(err);
     if (!btInitialised) {
-        gravity_bt_initialise();
+        wendigo_bt_initialise();
     }
 
     /* A little validation to be user-friendly */
     bool deviceFound = false;
     if (device != NULL) {
-        for (int i = 0; i < gravity_bt_dev_count && !deviceFound; ++i) {
-            deviceFound = !memcmp(gravity_bt_devices[i]->bda, device->bda, ESP_BD_ADDR_LEN);
+        for (int i = 0; i < wendigo_bt_dev_count && !deviceFound; ++i) {
+            deviceFound = !memcmp(wendigo_bt_devices[i]->bda, device->bda, ESP_BD_ADDR_LEN);
         }
     }
     /* Display a warning if there are no BT devices, or there are but the specified device is non-NULL and not found */
-    if (gravity_bt_dev_count == 0 || (device != NULL && !deviceFound)) {
+    if (wendigo_bt_dev_count == 0 || (device != NULL && !deviceFound)) {
         char dev_bda[MAC_STRLEN + 1];
         bda2str(device->bda, dev_bda, MAC_STRLEN + 1);
         #ifdef CONFIG_FLIPPER
-            printf("Specified Device\n%25s\nNot in Gravity scan results. Services will not be stored.\n", dev_bda);
+            printf("Specified Device\n%25s\nNot in Wendigo scan results. Services will not be stored.\n", dev_bda);
         #else
-            ESP_LOGW(BT_TAG, "Specified Device %s not in Gravity scan results. Services will not be stored.", dev_bda);
+            ESP_LOGW(BT_TAG, "Specified Device %s not in Wendigo scan results. Services will not be stored.", dev_bda);
         #endif
     }
     if (device == NULL) {
-        return gravity_bt_discover_all_services();
+        return wendigo_bt_discover_all_services();
     } else {
-        return gravity_bt_discover_services(device);
+        return wendigo_bt_discover_services(device);
     }
 }
 
 /* Display status of bluetooth scanning */
-esp_err_t gravity_bt_scan_display_status() {
+esp_err_t wendigo_bt_scan_display_status() {
     esp_err_t err = ESP_OK;
 
     #ifdef CONFIG_FLIPPER
-        printf("BT Classic %s, BLE %s\n%u Devices Discovered\n", attack_status[ATTACK_SCAN_BT_DISCOVERY]?"ON":"OFF", attack_status[ATTACK_SCAN_BLE]?"ON":"OFF", gravity_bt_dev_count);
+        printf("BT Classic %s, BLE %s\n%u Devices Discovered\n", attack_status[ATTACK_SCAN_BT_DISCOVERY]?"ON":"OFF", attack_status[ATTACK_SCAN_BLE]?"ON":"OFF", wendigo_bt_dev_count);
     #else
-        ESP_LOGI(BT_TAG, "Bluetooth Classic Scanning %s, BLE Scanning %s\t%u Devices Discovered", "maybe", "maybe", gravity_bt_dev_count);
+        ESP_LOGI(BT_TAG, "Bluetooth Classic Scanning %s, BLE Scanning %s\t%u Devices Discovered", "maybe", "maybe", wendigo_bt_dev_count);
     #endif
 
     return err;
 }
 
-esp_err_t gravity_bt_list_all_devices(bool hideExpiredPackets) {
+esp_err_t wendigo_bt_list_all_devices(bool hideExpiredPackets) {
     esp_err_t err = ESP_OK;
 
-    if (gravity_bt_dev_count > 0) {
-        err |= gravity_bt_list_devices(gravity_bt_devices, gravity_bt_dev_count, hideExpiredPackets);
+    if (wendigo_bt_dev_count > 0) {
+        err |= wendigo_bt_list_devices(wendigo_bt_devices, wendigo_bt_dev_count, hideExpiredPackets);
     } else {
         #ifdef CONFIG_FLIPPER
             printf("No HCIs in scan results\n");
@@ -1700,18 +1700,18 @@ esp_err_t gravity_bt_list_all_devices(bool hideExpiredPackets) {
     return err;
 }
 
-/* Convert a gravity_bt_scan_t enum to a string */
+/* Convert a wendigo_bt_scan_t enum to a string */
 /* The supplied strOutput must be an initialised char array of at least 18 bytes */
-esp_err_t bt_scanTypeToString(gravity_bt_scan_t scanType, char *strOutput) {
+esp_err_t bt_scanTypeToString(wendigo_bt_scan_t scanType, char *strOutput) {
     esp_err_t err = ESP_OK;
     switch (scanType) {
-        case GRAVITY_BT_SCAN_CLASSIC_DISCOVERY:
+        case WENDIGO_BT_SCAN_CLASSIC_DISCOVERY:
             strcpy(strOutput, "Classic Discovery");
             break;
-        case GRAVITY_BT_SCAN_BLE:
+        case WENDIGO_BT_SCAN_BLE:
             strcpy(strOutput, "Bluetooth LE");
             break;
-        case GRAVITY_BT_SCAN_TYPE_ACTIVE:
+        case WENDIGO_BT_SCAN_TYPE_ACTIVE:
             strcpy(strOutput, "Active Sniffing");
             break;
         default:
@@ -1732,32 +1732,32 @@ static int bt_comparator(const void *varOne, const void *varTwo) {
     return 0;
 }
 
-esp_err_t gravity_clear_bt() {
+esp_err_t wendigo_clear_bt() {
     esp_err_t err = ESP_OK;
 
     /* Clear selected BT devices first to avoid having pointers to free'd memory */
-    if (gravity_selected_bt != NULL) {
-        free(gravity_selected_bt);
-        gravity_selected_bt = NULL;
-        gravity_sel_bt_count = 0;
+    if (wendigo_selected_bt != NULL) {
+        free(wendigo_selected_bt);
+        wendigo_selected_bt = NULL;
+        wendigo_sel_bt_count = 0;
     }
 
-    if (gravity_bt_devices != NULL) {
-        for (int i = 0; i < gravity_bt_dev_count; ++i) {
-            if (gravity_bt_devices[i] != NULL) {
-                if (gravity_bt_devices[i]->bdName != NULL) {
-                    free(gravity_bt_devices[i]->bdName);
+    if (wendigo_bt_devices != NULL) {
+        for (int i = 0; i < wendigo_bt_dev_count; ++i) {
+            if (wendigo_bt_devices[i] != NULL) {
+                if (wendigo_bt_devices[i]->bdName != NULL) {
+                    free(wendigo_bt_devices[i]->bdName);
                 }
-                if (gravity_bt_devices[i]->eir != NULL) {
-                    free(gravity_bt_devices[i]->eir);
+                if (wendigo_bt_devices[i]->eir != NULL) {
+                    free(wendigo_bt_devices[i]->eir);
                 }
-                free(gravity_bt_devices[i]);
+                free(wendigo_bt_devices[i]);
             }
         }
-        free(gravity_bt_devices);
-        gravity_bt_devices = NULL;
+        free(wendigo_bt_devices);
+        wendigo_bt_devices = NULL;
     }
-    gravity_bt_dev_count = 0;
+    wendigo_bt_dev_count = 0;
     return err;
 }
 
@@ -1789,25 +1789,25 @@ esp_err_t bt_service_rm(app_gap_cb_t **devices, uint8_t devCount) {
 }
 
 esp_err_t bt_service_rm_all() {
-    return bt_service_rm(gravity_bt_devices, gravity_bt_dev_count);
+    return bt_service_rm(wendigo_bt_devices, wendigo_bt_dev_count);
 }
 
-/* Shrink gravity_bt_devices to remove gaps left after purging elements
-   This function will regenerate a new instance of gravity_bt_devices,
-   removing any elements of gravity_bt_devices that are NULL.
+/* Shrink wendigo_bt_devices to remove gaps left after purging elements
+   This function will regenerate a new instance of wendigo_bt_devices,
+   removing any elements of wendigo_bt_devices that are NULL.
 */
-esp_err_t gravity_bt_shrink_devices() {
+esp_err_t wendigo_bt_shrink_devices() {
     esp_err_t err = ESP_OK;
     uint8_t targetCount = 0; /* Number of elements at end of function */
     app_gap_cb_t **newDevices = NULL;
 
     /* Count number of elements in result */
-    for (int i = 0; i < gravity_bt_dev_count; ++i) {
-        if (gravity_bt_devices[i] != NULL) {
+    for (int i = 0; i < wendigo_bt_dev_count; ++i) {
+        if (wendigo_bt_devices[i] != NULL) {
             ++targetCount;
         }
     }
-    /* Allocate memory for new gravity_bt_devices if it has any elements */
+    /* Allocate memory for new wendigo_bt_devices if it has any elements */
     if (targetCount > 0) {
         newDevices = malloc(sizeof(app_gap_cb_t *) * targetCount);
         if (newDevices == NULL) {
@@ -1819,19 +1819,19 @@ esp_err_t gravity_bt_shrink_devices() {
             return ESP_ERR_NO_MEM;
         }
     }
-    /* Copy across pointers from gravity_bt_devices into newDevices */
+    /* Copy across pointers from wendigo_bt_devices into newDevices */
     targetCount = 0;
-    for (int i = 0; i < gravity_bt_dev_count; ++i) {
-        if (gravity_bt_devices[i] != NULL) {
-            newDevices[targetCount++] = gravity_bt_devices[i];
+    for (int i = 0; i < wendigo_bt_dev_count; ++i) {
+        if (wendigo_bt_devices[i] != NULL) {
+            newDevices[targetCount++] = wendigo_bt_devices[i];
         }
     }
-    /* Free and replace gravity_bt_devices */
-    if (gravity_bt_devices != NULL && gravity_bt_dev_count > 0) {
-        free(gravity_bt_devices);
+    /* Free and replace wendigo_bt_devices */
+    if (wendigo_bt_devices != NULL && wendigo_bt_dev_count > 0) {
+        free(wendigo_bt_devices);
     }
-    gravity_bt_devices = newDevices;
-    gravity_bt_dev_count = targetCount;
+    wendigo_bt_devices = newDevices;
+    wendigo_bt_dev_count = targetCount;
 
     return err;
 }

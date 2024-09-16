@@ -20,7 +20,7 @@
  *                                                            *
  * Licensed under the MIT Open Source License.                *
  **************************************************************/
-#define GRAVITY_VERSION "1.0.1"
+#define WENDIGO_VERSION "0.1.0"
 #define MAX_16_BIT 65535
 #define MAX_SSID_LEN 32
 #define MAC_STRLEN 17
@@ -65,9 +65,9 @@ esp_console_cmd_t commands[CMD_COUNT] = {
         .help = "Bluetooth help",
         .func = cmd_bluetooth
     }, {
-        .command = "gravity-version",
+        .command = "wendigo-version",
         .hint = "version hint",
-        .help = "Display esp32-Gravity version information.",
+        .help = "Display esp32-Wendigo version information.",
         .func = cmd_version
     }
 };
