@@ -1,5 +1,5 @@
-#ifndef GRAVITY_H
-#define GRAVITY_H
+#ifndef WENDIGO_H
+#define WENDIGO_H
 
 /* ********************** ESP32 Gravity ***********************
  * Gravity started life as a way to learn how to assemble and *

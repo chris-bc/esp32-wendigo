@@ -18,15 +18,15 @@
  * Licensed under the MIT Open Source License.                *
  **************************************************************/
 
-#include "gravity.h"
+#include "wendigo.h"
 
 #include "common.h"
 #include "esp_err.h"
 #include "esp_wifi_types.h"
 #include "freertos/portmacro.h"
 #include "sdkconfig.h"
-#define PROMPT_STR "gravity"
-#define TAG "GRAVITY"
+#define PROMPT_STR "wendigo"
+#define TAG "WENDIGO"
 
 /* Console command history can be stored to and loaded from a file.
  * The easiest way to do this is to use FATFS filesystem on top of

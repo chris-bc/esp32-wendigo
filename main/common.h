@@ -1,5 +1,5 @@
-#ifndef GRAVITY_COMMON_H
-#define GRAVITY_COMMON_H
+#ifndef WENDIGO_COMMON_H
+#define WENDIGO_COMMON_H
 
 /* Macro to mark a variable as unused in order to prevent compiler warnings
    This is defined in several of the bluetooth header files, but Bluetooth
