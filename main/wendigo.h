@@ -63,6 +63,9 @@
 
 /* Command specifications */
 esp_err_t cmd_bluetooth(int argc, char **argv);
+esp_err_t cmd_ble(int argc, char **argv);
+esp_err_t cmd_wifi(int argc, char **argv);
+esp_err_t cmd_status(int argc, char **argv);
 esp_err_t cmd_version(int argc, char **argv);
 
 void initPromiscuous();
@@ -70,19 +73,65 @@ int initialise_wifi();
 
 bool WIFI_INITIALISED = false;
 
-#define CMD_COUNT 2
+#define CMD_COUNT 10
 esp_console_cmd_t commands[CMD_COUNT] = {
     {
-        .command = "bluetooth",
-        .hint = "bluetooth hint",
-        .help = "Bluetooth help",
+        .command = "h",
+        .hint = "Bluetooth Classic Commands",
+        .help = "The `h(ci)` command allows management of the Host Controller Interface - Bluetooth Classic",
         .func = cmd_bluetooth
     }, {
-        .command = "wendigo-version",
-        .hint = "version hint",
-        .help = "Display esp32-Wendigo version information.",
+        .command = "hci",
+        .hint = "Bluetooth Classic Commands",
+        .help = "The `hci` command allows management of the Host Controller Interface - Bluetooth Classic",
+        .func = cmd_bluetooth
+    }, {
+        .command = "b",
+        .hint = "BLE Commands",
+        .help = "The `b(le)` command allows management of the Bluetooth Low Energy interface (BLE)",
+        .func = cmd_ble
+    }, {
+        .command = "ble",
+        .hint = "BLE Commands",
+        .help = "The `ble` command allows management of the Bluetooth Low Energy interface (BLE)",
+        .func = cmd_ble
+    }, {
+        .command = "w",
+        .hint = "WiFi Commands",
+        .help = "The `w(ifi)` command allows management of the WiFi interface",
+        .func = cmd_wifi
+    }, {
+        .command = "wifi",
+        .hint = "WiFi Commands",
+        .help = "The `wifi` command allows management of the WiFi interface",
+        .func = cmd_wifi
+    }, {
+        .command = "s",
+        .hint = "Status Information",
+        .help = "The `s(tatus)` command can be used to retrieve and modify certain status and configuration details",
+        .func = cmd_status
+    }, {
+        .command = "status",
+        .hint = "Status Information",
+        .help = "The `status` command can be used to retrieve and modify certain status and configuration details",
+        .func = cmd_status
+    }, {
+        .command = "v",
+        .hint = "Wendigo Version",
+        .help = "The `v(ersion)` command displays esp32-Wendigo version information",
+        .func = cmd_version
+    }, {
+        .command = "ver",
+        .hint = "Wendigo Version",
+        .help = "The `ver(sion)` command displays esp32-Wendigo version information",
         .func = cmd_version
     }
 };
+
+typdef enum {
+    MSG_ACK,
+    MSG_OK,
+    MSG_FAIL
+} MsgType;
 
 #endif

@@ -55,18 +55,133 @@ esp_err_t ieee80211_raw_frame_sanity_check(int32_t arg, int32_t arg2, int32_t ar
     return ESP_OK;
 }
 
-/* Run bluetooth test module */
-/* The bluetooth command may not be needed for quite some time now it's done as a PoC
-   Future expansion of the BT module to allow interactive exploration of the airspace would be neat.
-*/
+/* Display a simple out of memory message and set error code */
+esp_err_t outOfMemory() {
+    printf("Out of memory");
+    return ESP_ERR_NO_MEM;
+}
+
+/* Return the specified response over UART */
+esp_err_t send_response(char *cmd, char *arg, MsgType result) {
+    uint8_t len = strlen(cmd) + strlen(arg) + 3;
+    switch (result) {
+        case MSG_ACK:
+            len += 3;
+            break;
+        case MSG_OK:
+            len += 2;
+            break;
+        case MSG_FAIL:
+         len += 4;
+         break;
+    }
+    char *msg = malloc(sizeof(char) * len);
+    if (msg == NULL) {
+        outOfMemory();
+        return ESP_ERR_NO_MEM;
+    }
+    // concat string
+}
+
+/* Display command syntax for manipulating the HCI interface */
+void display_bt_syntax() {
+    printf("Usage: H[CI] ( 0 | 1 | 2 )\n0: Disable\n1: Enable\n2: Status");
+}
+
+/* This command is used to configure Bluetooth Classic status */
 esp_err_t cmd_bluetooth(int argc, char **argv) {
     esp_err_t err = ESP_OK;
-    #if defined(CONFIG_BT_ENABLED)
-        //err |= wendigo_ble_test();
-        printf("BT Test harness currently inactive.\n");
-    #else
-        displayBluetoothUnsupported();
+    char *msg;
+    #ifndef CONFIG_BT_ENABLED
+        ESP_LOGE(TAG, "Bluetooth Unsupported");
+        return ESP_ERR_NOT_ALLOWED;
     #endif
+
+    if (argc == 2 && strlen(argv[1]) == 1) {
+        /* Acknowledge the message */
+        msg = malloc(sizeof(char) * (strlen(argv[0]) + 7));
+        if (msg == NULL) {
+            err = outOfMemory();
+            return err;
+        }
+        strcpy(msg, argv[0]);
+        strcat(msg, " ");
+        strcat(msg, argv[1]);
+        strcat(msg, " ACK");
+        printf(msg);
+        free(msg);
+        /* Perform the command */
+        /* First verify syntax - argv[1] is '0', '1', or '2' */
+        switch (argv[1][0]) {
+            case '0':
+                /* Disable BT Classic */
+                // TODO: err = disable_bt()
+                break;
+            case '1':
+                /* Enable BT Classic */
+                // TODO: err = enable_bt()
+                break;
+            case '2':
+                /* Return BT Classic status */
+                // TODO: err = bt_status()
+                break;
+            default:
+                /* Display command syntax */
+                display_bt_syntax();
+                err = ESP_ERR_INVALID_ARG;
+                break;
+        }
+    } else {
+        display_bt_syntax();
+        err = ESP_ERR_INVALID_ARG;
+    }
+    if (err == ESP_OK) {
+        /* Command succeeded. Inform success */
+        msg = malloc(sizeof(char) * (strlen(argv[0]) + 6));
+        if (msg == NULL) {
+            err = outOfMemory();
+            return err;
+        }
+        strcpy(msg, argv[0]);
+        strcat(msg, " ");
+        strcat(msg, argv[1]);
+        strcat(msg, " OK");
+        printf(msg);
+        free(msg);
+    } else {
+        /* Command failed */
+        msg = malloc(sizeof(char) * (strlen(argv[0]) + 8));
+        if (msg == NULL) {
+            err = outOfMemory();
+            return err;
+        }
+        strcpy(msg, argv[0]);
+        strcat(msg, " ");
+        strcat(msg, argv[1]);
+        strcat(msg, " FAIL");
+        printf(msg);
+        free(msg);
+    }
+    return err;
+}
+
+/* Configure BLE status */
+esp_err_t cmd_ble(int argc, char **argv) {
+    esp_err_t err = ESP_OK;
+    // CONFIG_BLE??
+    // TODO: Enable/Disable BLE scanning
+    return err;
+}
+
+esp_err_t cmd_wifi(int argc, char **agrv) {
+    esp_err_t err = ESP_OK;
+    // TODO: Manipulate WiFi
+    return err;
+}
+
+esp_err_t cmd_status(int argc, char **argv) {
+    esp_err_t err = ESP_OK;
+    // TODO: Do stuff
     return err;
 }
 
