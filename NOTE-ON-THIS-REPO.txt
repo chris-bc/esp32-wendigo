@@ -1,0 +1,4 @@
+The ESP32-Wendigo repository has been merged with the Flipper-Wendigo repository.
+
+Wendigo source, targetting both Flipper and ESP32, can be found at https://github.com/chris-bc/wendigo.
+
