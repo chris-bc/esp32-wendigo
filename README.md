@@ -1,15 +1,7 @@
-# [NOT YET WORKING] esp32-wendigo
-ESP32 firmware to accompany the Wendigo Flipper Zero application.
+# [PROJECT HAS MOVED] esp32-wendigo
+Wendigo **will be** a Flipper Zero application with an intuitive user interface that identifies and monitors radio signals transmitted by personal devices - Wireless, Bluetooth Classic, and Bluetooth Low Energy. The application is composed of two discrete programs, a Flipper Zero program providing a user interface and analytics, and an ESP32 program that interfaces with the radio spectrum.
 
-ESP32-Wendigo **will be** an ESP32 firmware to monitor and analyse WiFi, Bluetooth Classic and Bluetooth Low Energy devices. See https://github.com/chris-bc/wendigo for more information on the Flipper Zero application. Unlike previous applications, ESP32-Wendigo **will not** provide a CLI/console application suitable for use with other hardware; the ESP32 I/O is based on a binary protocol to feed relevant data to Flipper Zero, which contains the complete client application (i.e. Flipper does not just display the console output of the ESP32).
+Unlike ESP32-Gravity (and many other ESP applications that run on/with Flipper), the ESP32 component of Wendigo **is not** designed to be run without a Flipper Zero. This allows a more robust and complete UI to be implemented on Flipper Zero, as opposed to other applications that perform all meaningful operations on the ESP32 and use Flipper Zero as a basic serial console. Performing all operations on the ESP32 allows the application to be used with any device able to establish a serial connection with the ESP32 (such as a laptop, or even a smartphone), but places severe limitations on how sophisticated the application and user interface can be.
 
-## Building & Flashing
+You can find Wendigo at https://github.com/chris-bc/wendigo
 
-
-## Getting the Flipper Zero application
-
-
-## Compatibility
-
-
-## Protocol
